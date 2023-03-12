@@ -20,10 +20,12 @@ namespace ConsoleApp1
   }
 
   [Serializable]
-  class txtFile : IOriginator
+  public class txtFile : IOriginator
   {
     public string text;
     public string tags;
+
+    public txtFile() { }
 
     public txtFile(string text, string tags)
     {
@@ -31,20 +33,45 @@ namespace ConsoleApp1
       this.tags = tags;
     }
 
-    public void Serialize(FileStream fs)
+    public string BinarySerialize()
     {
+      string FileName = "file.dat";
+      FileStream fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write);
       BinaryFormatter bf = new BinaryFormatter();
       bf.Serialize(fs, this);
       fs.Flush();
       fs.Close();
+      return FileName;
     }
 
-    public void Deserialize(FileStream fs)
+    public void BinaryDeserialize(string FileName)
     {
+      FileStream fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Read);
       BinaryFormatter bf = new BinaryFormatter();
       txtFile deserialized = (txtFile)bf.Deserialize(fs);
       text = deserialized.text;
       fs.Close();
+    }
+
+    static public string XMLSerialize(txtFile details)
+    {
+      string FileName = "file.xml";
+      XmlSerializer serializer = new XmlSerializer(typeof(txtFile));
+      using (TextWriter writer = new StreamWriter(FileName))
+      {
+        serializer.Serialize(writer, details);
+      }
+      return FileName;
+    }
+
+    static public txtFile XMLDeserialize(string FileName)
+    {
+      XmlSerializer deserializer = new XmlSerializer(typeof(txtFile));
+      TextReader reader = new StreamReader(FileName);
+      object obj = deserializer.Deserialize(reader);
+      txtFile XmlData = (txtFile)obj;
+      reader.Close();
+      return XmlData;
     }
 
     public void PrintText()
@@ -107,9 +134,10 @@ namespace ConsoleApp1
   {
     static void Main(string[] args)
     {
+
       const int NumberOfFiles = 10;
-      txtFile file;
       txtFile[] Library = new txtFile[NumberOfFiles];
+      txtFile file;
 
       file = new txtFile("какой то текст первого файла", "тег3");
       Library[0] = file;
@@ -150,21 +178,46 @@ namespace ConsoleApp1
       Console.WriteLine("Введите новый текст файла: ");
       string NewText = Convert.ToString(Console.ReadLine());
       Library[FileNumber].text = NewText;
-      Console.WriteLine("сохранить следующий файл ?(да/нет)");
-      Library[FileNumber].PrintText();
+      Console.WriteLine("сохранить ?(да/нет)");
 
       string SaveChoice = Convert.ToString(Console.ReadLine());
       if(SaveChoice == "нет")
       {
         ct.RestoreState(Library[FileNumber]);
-        Console.WriteLine("файл остался следующим: ");
+        Console.WriteLine("файл остался прежним: ");
         Library[FileNumber].PrintText();
       }
       else
       {
-        Console.WriteLine("файл сохранен и выглядит следующим обазом:");
+        Console.WriteLine("файл сохранен и стал:");
         Library[FileNumber].PrintText();
       }
+
+      /*тест сериализации
+      бинарная сериализация:
+
+      string filebiName;
+      txtFile t = new txtFile("работает !", "какой то тег");
+      t.PrintText();
+      filebiName = t.BinarySerialize();
+
+      t = new txtFile("gfowie89rfu34h-9f84yf-04", "какой то тег");
+      t.PrintText();
+
+      t.BinaryDeserialize(filebiName);
+      t.PrintText();
+
+      XML сериализация:
+      txtFile textXML = new txtFile("проверяем", "тег");
+      string fileName = txtFile.XMLSerialize(textXML);
+      textXML.PrintText();
+
+      textXML = new txtFile("работает ли ?", "тег");
+      textXML.PrintText();
+
+      textXML = txtFile.XMLDeserialize(fileName);
+      textXML.PrintText();
+      */
       Console.ReadKey();
     }
   }
