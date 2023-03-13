@@ -85,7 +85,7 @@ namespace ConsoleApp1
     }
     void IOriginator.SetMemento(object memento)
     {
-      if(memento is Memento)
+      if (memento is Memento)
       {
         var mem = memento as Memento;
         text = mem.text;
@@ -135,7 +135,7 @@ namespace ConsoleApp1
     static void Main(string[] args)
     {
 
-      const int NumberOfFiles = 10;
+      const int NumberOfFiles = 5;
       txtFile[] Library = new txtFile[NumberOfFiles];
       txtFile file;
 
@@ -149,16 +149,6 @@ namespace ConsoleApp1
       Library[3] = file;
       file = new txtFile("какой то текст пятого файла", "тег1");
       Library[4] = file;
-      file = new txtFile("какой то текст шестого файла", "тег2");
-      Library[5] = file;
-      file = new txtFile("какой то текст седьмого файла", "тег9");
-      Library[6] = file;
-      file = new txtFile("какой то текст восьмого файла", "тег6");
-      Library[7] = file;
-      file = new txtFile("какой то текст девятого файла", "тег5");
-      Library[8] = file;
-      file = new txtFile("какой то текст десятого файла", "тег8");
-      Library[9] = file;
 
       Console.WriteLine("файл с каким тегом необходим: ");
       string Request = Convert.ToString(Console.ReadLine());
@@ -170,6 +160,8 @@ namespace ConsoleApp1
       Console.WriteLine("выберите файл, который необходимо отредактировать: ");
       int FileNumber = Convert.ToInt32(Console.ReadLine());
 
+      string FileName = txtFile.XMLSerialize(Library[FileNumber]);
+
       Console.WriteLine("текст этого файла:");
       Caretaker ct = new Caretaker();
       Library[FileNumber].PrintText();
@@ -178,12 +170,15 @@ namespace ConsoleApp1
       Console.WriteLine("Введите новый текст файла: ");
       string NewText = Convert.ToString(Console.ReadLine());
       Library[FileNumber].text = NewText;
-      Console.WriteLine("сохранить ?(да/нет)");
+      FileName = txtFile.XMLSerialize(Library[FileNumber]);
 
+      Console.WriteLine("сохранить ?(да/нет)");
       string SaveChoice = Convert.ToString(Console.ReadLine());
-      if(SaveChoice == "нет")
+
+      if (SaveChoice == "нет")
       {
         ct.RestoreState(Library[FileNumber]);
+        FileName = txtFile.XMLSerialize(Library[FileNumber]);
         Console.WriteLine("файл остался прежним: ");
         Library[FileNumber].PrintText();
       }
@@ -193,31 +188,6 @@ namespace ConsoleApp1
         Library[FileNumber].PrintText();
       }
 
-      /*тест сериализации
-      бинарная сериализация:
-
-      string filebiName;
-      txtFile t = new txtFile("работает !", "какой то тег");
-      t.PrintText();
-      filebiName = t.BinarySerialize();
-
-      t = new txtFile("gfowie89rfu34h-9f84yf-04", "какой то тег");
-      t.PrintText();
-
-      t.BinaryDeserialize(filebiName);
-      t.PrintText();
-
-      XML сериализация:
-      txtFile textXML = new txtFile("проверяем", "тег");
-      string fileName = txtFile.XMLSerialize(textXML);
-      textXML.PrintText();
-
-      textXML = new txtFile("работает ли ?", "тег");
-      textXML.PrintText();
-
-      textXML = txtFile.XMLDeserialize(fileName);
-      textXML.PrintText();
-      */
       Console.ReadKey();
     }
   }
